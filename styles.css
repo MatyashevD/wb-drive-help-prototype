@@ -21,8 +21,9 @@
     --mo-controls-secondary-default: #f1f1f5;
     --mo-controls-text-icon-secondary-default: #8f8fa3;
     --mo-separator-default: rgba(119, 119, 136, 0.15);
-    --mo-accent-purple: #cb11ab; /* WB-фиолетовый из иконок */
-    --mo-accent-purple-soft: rgba(203, 17, 171, 0.08);
+    --mo-accent-purple: #a73afd; /* WB-фиолетовый из дизайн-системы (DS UI-kit) */
+    --mo-accent-purple-soft: rgba(167, 58, 253, 0.08);
+    --mo-tabbar-inactive: #808093; /* Цвет неактивных иконок таббара из Figma */
     --mo-warning-bg: #fff4d6;
     --mo-warning-fg: #8a6300;
     --mo-info-bg: #e8eaff;
@@ -643,7 +644,7 @@ a {
     display: grid;
     place-items: center;
     padding: 12px 8px;
-    color: var(--mo-text-icon-tertiary);
+    color: var(--mo-tabbar-inactive);
 }
 .tabbar__tab svg {
     width: 24px;
@@ -653,10 +654,10 @@ a {
     color: var(--mo-accent-purple);
 }
 .tabbar__home {
-    width: 144px;
-    height: 5px;
+    width: 72px;
+    height: 2px;
     background: var(--mo-text-icon-primary);
-    margin: 4px auto 8px;
+    margin: 24px auto 8px;
     border-radius: 8px;
 }
 
