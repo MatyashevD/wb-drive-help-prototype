@@ -514,6 +514,58 @@ a {
 }
 
 /* ============================================================
+   Tabs (горизонтальный chip-style, sticky под поиском)
+   ============================================================ */
+.tabs {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--mo-bg-level--1);
+    padding: 4px 0 8px;
+}
+.tabs__row {
+    display: flex;
+    gap: 8px;
+    padding: 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.tabs__row::-webkit-scrollbar {
+    display: none;
+}
+.tabchip {
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--mo-CRpill);
+    background: var(--mo-bg-level-1-base);
+    color: var(--mo-text-icon-secondary);
+    font-size: var(--font-size-body);
+    line-height: var(--font-line-body);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+    border: 1px solid transparent;
+}
+.tabchip:active {
+    background: var(--mo-bg-level-3);
+}
+.tabchip.is-active {
+    background: var(--mo-text-icon-primary);
+    color: #fff;
+}
+
+.tab-intro {
+    padding: 8px 16px 0;
+    font-size: var(--font-size-body);
+    line-height: var(--font-line-body);
+    color: var(--mo-text-icon-secondary);
+}
+
+/* ============================================================
    Featured-карточка (Начало работы)
    ============================================================ */
 .featured {

@@ -205,28 +205,25 @@
         `;
     }
 
-    /** Главный экран помощи: поиск + featured + категории + популярное + в поддержку. */
-    function renderHelp() {
-        const featured = data.featured;
+    /**
+     * Главный экран помощи: поиск + sticky tab-bar + контент таба.
+     * Дефолтный таб — «Популярное» (топ статей по popularity); там же
+     * featured-карточка «Начало работы» для новичков.
+     * Остальные табы — списки статей соответствующих категорий.
+     */
+    function renderHelp(activeTabId = 'popular') {
+        const tabs = [
+            { id: 'popular', title: 'Популярное' },
+            ...data.categories.map((c) => ({ id: c.id, title: c.title })),
+        ];
 
-        const categoriesHtml = data.categories
-            .map((c) =>
-                listItem({
-                    icon: c.icon,
-                    title: c.title,
-                    desc: c.description,
-                    href: `#/help/category/${c.id}`,
-                })
-            )
-            .join('');
+        // Если переданный tab невалидный — фоллбек на «popular».
+        if (!tabs.find((t) => t.id === activeTabId)) activeTabId = 'popular';
 
-        const popularHtml = popularArticles(5)
-            .map((a) =>
-                listItem({
-                    title: a.title,
-                    desc: getCategory(a.categoryId).title,
-                    href: `#/help/article/${a.id}`,
-                })
+        const tabsHtml = tabs
+            .map(
+                (t) =>
+                    `<button class="tabchip ${t.id === activeTabId ? 'is-active' : ''}" data-tab="${t.id}">${esc(t.title)}</button>`
             )
             .join('');
 
@@ -251,41 +248,119 @@
                     <div id="search-results"></div>
 
                     <div id="default-content">
-                        <button class="featured" data-href="#/help/article/${featured.id}">
-                            <div class="featured__icon">${svgUse(featured.icon)}</div>
-                            <div class="featured__text">
-                                <h3 class="featured__title">${esc(featured.title)}</h3>
-                                <p class="featured__subtitle">${esc(featured.subtitle)}</p>
+                        <div class="tabs" role="tablist" aria-label="Темы помощи">
+                            <div class="tabs__row" id="help-tabs">
+                                ${tabsHtml}
                             </div>
-                            <div class="featured__chevron">${svgUse('i-chevron-right')}</div>
-                        </button>
-
-                        <h2 class="section__title">Категории</h2>
-                        <div class="card" style="margin-top:0">
-                            ${categoriesHtml}
                         </div>
 
-                        <h2 class="section__title">${svgUse('i-fire')} Популярные вопросы</h2>
-                        <div class="card" style="margin-top:0">
-                            ${popularHtml}
-                        </div>
-
-                        <button class="support-cta" data-action="contact-support">
-                            <div class="support-cta__icon">${svgUse('i-headset')}</div>
-                            <div class="support-cta__body">
-                                <h3 class="support-cta__title">Не нашли ответ?</h3>
-                                <p class="support-cta__desc">Напишите в поддержку — отвечаем за 5 минут</p>
-                            </div>
-                            <div class="list-item__chevron">${svgUse('i-chevron-right')}</div>
-                        </button>
-
-                        <div style="height:24px"></div>
+                        <div id="tab-content"></div>
                     </div>
                 </div>
             </div>
         `;
 
+        renderTabContent(activeTabId);
         wireSearch();
+        wireTabs();
+    }
+
+    /** Содержимое выбранного таба. */
+    function renderTabContent(tabId) {
+        const box = document.getElementById('tab-content');
+        if (!box) return;
+
+        if (tabId === 'popular') {
+            const featured = data.featured;
+            const articles = popularArticles(7);
+
+            box.innerHTML = `
+                <button class="featured" data-href="#/help/article/${featured.id}">
+                    <div class="featured__icon">${svgUse(featured.icon)}</div>
+                    <div class="featured__text">
+                        <h3 class="featured__title">${esc(featured.title)}</h3>
+                        <p class="featured__subtitle">${esc(featured.subtitle)}</p>
+                    </div>
+                    <div class="featured__chevron">${svgUse('i-chevron-right')}</div>
+                </button>
+
+                <h2 class="section__title">${svgUse('i-fire')} Часто спрашивают</h2>
+                <div class="card" style="margin-top:0">
+                    ${articles
+                        .map((a) =>
+                            listItem({
+                                title: a.title,
+                                desc: getCategory(a.categoryId).title,
+                                href: `#/help/article/${a.id}`,
+                            })
+                        )
+                        .join('')}
+                </div>
+
+                ${supportCtaHtml()}
+                <div style="height:24px"></div>
+            `;
+            return;
+        }
+
+        // Категория
+        const category = getCategory(tabId);
+        const articles = categoryArticles(tabId);
+
+        box.innerHTML = `
+            <div class="tab-intro">${esc(category.description)}</div>
+            <div class="card" style="margin-top:0">
+                ${
+                    articles.length
+                        ? articles
+                              .map((a) =>
+                                  listItem({
+                                      title: a.title,
+                                      desc: a.excerpt,
+                                      href: `#/help/article/${a.id}`,
+                                  })
+                              )
+                              .join('')
+                        : '<p class="empty__desc" style="text-align:center;padding:24px 0">В этой категории пока нет статей</p>'
+                }
+            </div>
+
+            ${supportCtaHtml()}
+            <div style="height:24px"></div>
+        `;
+    }
+
+    function supportCtaHtml() {
+        return `
+            <button class="support-cta" data-action="contact-support">
+                <div class="support-cta__icon">${svgUse('i-headset')}</div>
+                <div class="support-cta__body">
+                    <h3 class="support-cta__title">Не нашли ответ?</h3>
+                    <p class="support-cta__desc">Напишите в поддержку — отвечаем за 5 минут</p>
+                </div>
+                <div class="list-item__chevron">${svgUse('i-chevron-right')}</div>
+            </button>
+        `;
+    }
+
+    /** Хук на переключение табов: обновляет URL и контент без перезагрузки. */
+    function wireTabs() {
+        const row = document.getElementById('help-tabs');
+        if (!row) return;
+        row.addEventListener('click', (e) => {
+            const btn = e.target.closest('.tabchip');
+            if (!btn) return;
+            const tabId = btn.dataset.tab;
+            row.querySelectorAll('.tabchip').forEach((el) =>
+                el.classList.toggle('is-active', el === btn)
+            );
+            // Прокрутить активный таб в зону видимости (когда табов больше, чем влезает).
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            // Поменять hash без триггера hashchange (через replaceState).
+            const newHash = tabId === 'popular' ? '#/help' : `#/help?tab=${tabId}`;
+            history.replaceState(null, '', newHash);
+            renderTabContent(tabId);
+        });
     }
 
     /** Хук поиска: реактивно перерисовывает блок результатов. */
@@ -345,36 +420,10 @@
         });
     }
 
-    /** Список статей внутри одной категории. */
-    function renderCategory(categoryId) {
-        const category = getCategory(categoryId);
-        if (!category) return renderNotFound();
-        const articles = categoryArticles(categoryId);
-
-        const itemsHtml = articles
-            .map((a) =>
-                listItem({
-                    title: a.title,
-                    desc: a.excerpt,
-                    href: `#/help/article/${a.id}`,
-                })
-            )
-            .join('');
-
-        screen.innerHTML = `
-            <div class="page page--enter">
-                ${statusbar()}
-                ${navbar({ title: category.title })}
-                <div class="page__scroll">
-                    <div class="card" style="margin-top:8px">
-                        <p class="card__subtitle" style="margin:0">${esc(category.description)}</p>
-                    </div>
-                    <div class="card">
-                        ${itemsHtml || '<p class="empty__desc" style="text-align:center">В этой категории пока нет статей</p>'}
-                    </div>
-                </div>
-            </div>
-        `;
+    /** Backward-compat: старая ссылка #/help/category/:id → главный экран Help с этим табом активным. */
+    function redirectLegacyCategory(categoryId) {
+        if (!getCategory(categoryId)) return renderNotFound();
+        location.replace(`#/help?tab=${categoryId}`);
     }
 
     /** Экран статьи — имитация WebView. Шапка плоская, без таббара, с бейджем. */
@@ -423,19 +472,22 @@
     // ───────────────────────────────────────────────────────────
 
     function route() {
-        const hash = location.hash.replace(/^#\/?/, '');
-        const parts = hash.split('/').filter(Boolean);
+        // Hash вида "#/help?tab=payment" → path="help", query={tab:'payment'}.
+        const raw = location.hash.replace(/^#\/?/, '');
+        const [pathPart, queryPart = ''] = raw.split('?');
+        const parts = pathPart.split('/').filter(Boolean);
+        const query = Object.fromEntries(new URLSearchParams(queryPart));
 
         if (parts.length === 0) {
             renderProfile();
             return;
         }
         if (parts[0] === 'help' && parts.length === 1) {
-            renderHelp();
+            renderHelp(query.tab || 'popular');
             return;
         }
         if (parts[0] === 'help' && parts[1] === 'category' && parts[2]) {
-            renderCategory(parts[2]);
+            redirectLegacyCategory(parts[2]);
             return;
         }
         if (parts[0] === 'help' && parts[1] === 'article' && parts[2]) {
