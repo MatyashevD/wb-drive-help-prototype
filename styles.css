@@ -106,6 +106,18 @@ a {
     text-decoration: none;
 }
 
+/* Защита от «гигантских» SVG: если у иконки в .phone не задан размер
+   (ни через атрибуты, ни через специфичный CSS-селектор) — даём ей
+   дефолт 24×24, чтобы она не вылезла за макет в дефолтных 300×150.
+   Скоуп ограничен .phone, чтобы не задеть спрайт с <symbol>'ами,
+   а селектор :not([width]) — чтобы не переопределить иконки
+   статус-бара (там свои нестандартные размеры). */
+.phone svg:not([width]) {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+}
+
 /* ============================================================
    Phone frame (макет видим на десктопе как «телефон в руке»)
    ============================================================ */
@@ -307,6 +319,10 @@ a {
     place-items: center;
     color: var(--mo-accent-purple);
 }
+.profile-header__top button svg {
+    width: 24px;
+    height: 24px;
+}
 .profile-avatar {
     margin: 0 auto;
     width: 88px;
@@ -440,6 +456,10 @@ a {
     color: var(--mo-text-icon-tertiary);
     display: grid;
     place-items: center;
+}
+.list-item__chevron svg {
+    width: 24px;
+    height: 24px;
 }
 
 /* ============================================================
