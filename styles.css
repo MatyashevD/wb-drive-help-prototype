@@ -24,6 +24,12 @@
     --mo-accent-purple: #a73afd; /* WB-фиолетовый из дизайн-системы (DS UI-kit) */
     --mo-accent-purple-soft: rgba(167, 58, 253, 0.08);
     --mo-tabbar-inactive: #808093; /* Цвет неактивных иконок таббара из Figma */
+
+    /* Chips-табы из дизайн-системы (--chips/bg|text/defaulton|defaultoff) */
+    --chips-bg-on: #f2e6fe;
+    --chips-text-on: #a73afd;
+    --chips-bg-off: #f3f3f7;
+    --chips-text-off: #242429;
     --mo-warning-bg: #fff4d6;
     --mo-warning-fg: #8a6300;
     --mo-info-bg: #e8eaff;
@@ -540,19 +546,23 @@ a {
 }
 
 /* ============================================================
-   Tabs (горизонтальный chip-style, sticky под поиском)
+   Tabs / Chips (паттерн из DS UI-kit: --chips/bg|text/defaulton|off)
+   Видим как в Figma /3-Баланс/История вывода средств:
+   активный — soft purple (#F2E6FE / #A73AFD),
+   неактивный — серый чип с тёмным текстом (#F3F3F7 / #242429).
    ============================================================ */
 .tabs {
     position: sticky;
     top: 0;
     z-index: 5;
     background: var(--mo-bg-level--1);
-    padding: 4px 0 8px;
+    /* DS-отступы контейнера .🔶 addons: pt 8, pb 12, px 16 */
+    padding: 8px 0 12px;
 }
 .tabs__row {
     display: flex;
-    gap: 8px;
-    padding: 0 8px;
+    gap: 8px; /* DS: --spx2 */
+    padding: 0 16px; /* DS: --spx4 */
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
@@ -562,31 +572,27 @@ a {
 .tabs__row::-webkit-scrollbar {
     display: none;
 }
-/*
-   Состояния по дизайн-системе WB Drive:
-   — Primary action (активный таб): bg #A73AFD, text #FFFFFF
-   — Secondary (неактивный таб):    bg #F6F6F9, text #A73AFD
-*/
 .tabchip {
     flex-shrink: 0;
-    height: 36px;
-    padding: 0 14px;
-    border-radius: var(--mo-CRpill);
-    background: var(--mo-bg-level-2);
-    color: var(--mo-accent-purple);
-    font-size: var(--font-size-body);
-    line-height: var(--font-line-body);
-    font-weight: 500;
+    /* DS-композиция отступов: chip py 7px + label py 2px = 9px,
+       chip px 8px + label px 4px = 12px */
+    padding: 9px 12px;
+    border-radius: 12px; /* DS: --brx3 */
+    background: var(--chips-bg-off);
+    color: var(--chips-text-off);
+    font-size: 15px; /* DS: Body/body — horse */
+    line-height: 22px;
+    font-weight: 400;
     white-space: nowrap;
     transition: background 0.15s ease, color 0.15s ease;
-    border: 1px solid transparent;
+    border: none;
 }
 .tabchip:active {
-    background: var(--mo-bg-level-3);
+    filter: brightness(0.95);
 }
 .tabchip.is-active {
-    background: var(--mo-accent-purple);
-    color: #ffffff;
+    background: var(--chips-bg-on);
+    color: var(--chips-text-on);
 }
 
 .tab-intro {
