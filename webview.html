@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>WB Drive — Помощь · Прототип A (WebView)</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css?v=7" />
+    <style>
+        /* ====================================================
+           Webview-only стили: простыня контента из CMS
+           ==================================================== */
+
+        .webview-page {
+            background: var(--mo-bg-level-1-base);
+        }
+
+        /* Поиск-фильтр поверх простыни. Sticky под навбаром. */
+        .wv-search {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--mo-bg-level-1-base);
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--mo-separator-default);
+        }
+        .wv-search__field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 44px;
+            padding: 0 14px;
+            background: var(--mo-controls-secondary-default);
+            border-radius: var(--mo-CRpill);
+        }
+        .wv-search__field svg {
+            color: var(--mo-text-icon-tertiary);
+            width: 20px;
+            height: 20px;
+        }
+        .wv-search__field input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: var(--font-size-action);
+            line-height: var(--font-line-action);
+            color: var(--mo-text-icon-primary);
+            font-family: var(--font-family);
+            min-width: 0;
+        }
+        .wv-search__field input::placeholder {
+            color: var(--mo-text-icon-tertiary);
+        }
+        .wv-search__hint {
+            font-size: 12px;
+            line-height: 16px;
+            color: var(--mo-text-icon-tertiary);
+            margin: 6px 0 0;
+            font-family: 'Roboto', sans-serif;
+        }
+        .wv-search__hint b {
+            color: var(--mo-accent-purple);
+            font-weight: 600;
+        }
+
+        /* Заголовки разделов простыни */
+        .wv-section {
+            padding: 24px 16px 4px;
+        }
+        .wv-section__title {
+            font-size: 22px;
+            line-height: 26px;
+            font-weight: 700;
+            margin: 0 0 4px;
+            color: var(--mo-text-icon-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .wv-section__title svg {
+            color: var(--mo-accent-purple);
+            width: 24px;
+            height: 24px;
+        }
+        .wv-section__lead {
+            font-size: var(--font-size-body);
+            line-height: var(--font-line-body);
+            color: var(--mo-text-icon-secondary);
+            margin: 0 0 8px;
+        }
+
+        /* Аккордеон-статья (это нативный <details>, удобный
+           компонент CMS-редактора). */
+        .wv-acc {
+            border-bottom: 1px solid var(--mo-separator-default);
+        }
+        .wv-acc[open] {
+            background: rgba(167, 58, 253, 0.025);
+        }
+        .wv-acc__summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 14px 16px 14px 0;
+            margin-left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            font-size: var(--font-size-action);
+            line-height: var(--font-line-action);
+            color: var(--mo-text-icon-primary);
+        }
+        .wv-acc__summary::-webkit-details-marker {
+            display: none;
+        }
+        .wv-acc__summary::marker {
+            content: '';
+        }
+        .wv-acc__chevron {
+            margin-left: auto;
+            color: var(--mo-text-icon-tertiary);
+            flex-shrink: 0;
+            transition: transform 0.18s ease;
+            width: 20px;
+            height: 20px;
+        }
+        .wv-acc[open] .wv-acc__chevron {
+            transform: rotate(90deg);
+            color: var(--mo-accent-purple);
+        }
+        .wv-acc__title {
+            flex: 1;
+            min-width: 0;
+            font-weight: 500;
+        }
+        .wv-acc__pop {
+            font-size: 11px;
+            line-height: 14px;
+            color: var(--mo-accent-purple);
+            background: rgba(167, 58, 253, 0.08);
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .wv-acc__body {
+            padding: 0 16px 20px;
+        }
+        .wv-acc__body h1,
+        .wv-acc__body h2 {
+            display: none; /* первый h1 у нас уже в summary */
+        }
+        .wv-acc__body p {
+            font-size: var(--font-size-action);
+            line-height: 24px;
+            margin: 0 0 12px;
+        }
+        .wv-acc__body ul,
+        .wv-acc__body ol {
+            padding-left: 22px;
+            margin: 0 0 12px;
+        }
+        .wv-acc__body li {
+            list-style: revert;
+            margin-bottom: 8px;
+            font-size: var(--font-size-action);
+            line-height: 24px;
+        }
+        .wv-acc__body strong {
+            font-weight: 600;
+        }
+        .wv-acc__body a {
+            color: var(--mo-accent-purple);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .wv-acc__body .callout {
+            margin: 12px 0;
+        }
+
+        /* Image placeholder — типовой ассет, который кладёт CMS-редактор. */
+        .wv-img {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background:
+                linear-gradient(135deg, #efeff4 25%, transparent 25%, transparent 50%, #efeff4 50%, #efeff4 75%, transparent 75%, transparent) 0 0/16px 16px,
+                #f6f6f9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--mo-text-icon-tertiary);
+            font-size: 12px;
+            margin: 8px 0 12px;
+            border: 1px solid var(--mo-separator-default);
+        }
+        .wv-img__inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .wv-img__inner svg {
+            width: 28px;
+            height: 28px;
+            color: var(--mo-text-icon-tertiary);
+        }
+
+        .wv-related {
+            background: var(--mo-bg-level-2);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin: 12px 0;
+            font-size: 13px;
+            line-height: 18px;
+        }
+        .wv-related__label {
+            font-weight: 600;
+            color: var(--mo-text-icon-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.4px;
+        }
+
+        /* Empty state когда ничего не найдено */
+        .wv-empty {
+            display: none;
+            padding: 48px 24px;
+            text-align: center;
+        }
+        .wv-empty.is-visible {
+            display: block;
+        }
+
+        .wv-acc.is-hidden {
+            display: none;
+        }
+        .wv-section.is-hidden {
+            display: none;
+        }
+
+        mark.match {
+            background: rgba(167, 58, 253, 0.18);
+            color: var(--mo-accent-purple);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+
+        /* Footer-CTA в конце простыни */
+        .wv-footer-cta {
+            margin: 24px 16px;
+            padding: 20px;
+            background: var(--mo-bg-level-2);
+            border-radius: 16px;
+            text-align: center;
+        }
+        .wv-footer-cta h3 {
+            font-size: var(--font-size-action);
+            line-height: var(--font-line-action);
+            font-weight: 600;
+            margin: 0 0 4px;
+        }
+        .wv-footer-cta p {
+            font-size: var(--font-size-body);
+            line-height: var(--font-line-body);
+            color: var(--mo-text-icon-secondary);
+            margin: 0 0 12px;
+        }
+        .wv-footer-cta button {
+            background: var(--mo-accent-purple);
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: var(--mo-CRpill);
+            font-size: var(--font-size-action);
+            line-height: var(--font-line-action);
+            font-family: var(--font-family);
+        }
+
+    </style>
+</head>
+<body>
+    <aside class="desk-hint" aria-hidden="true">
+        <div class="desk-hint__inner">
+            <strong>WB Drive · Помощь — прототип A</strong>
+            <span>Один WebView с длинной простынёй из CMS. Минимум разработки — максимум контентной свободы.</span>
+        </div>
+    </aside>
+
+    <a class="proto-switch" href="index.html">Открыть прототип B (нативный) →</a>
+
+    <div class="phone">
+        <div class="phone__screen">
+            <div class="page webview-page">
+                <!-- Status bar -->
+                <div class="statusbar">
+                    <span class="statusbar__time">12:30</span>
+                    <span class="statusbar__icons" aria-hidden="true">
+                        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 8h2v4H2zm4-2h2v6H6zm4-2h2v8h-2zm4-2h2v10h-2z" fill="currentColor"/></svg>
+                        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 3l-3 4h6L8 3zm-3 5h6v3H5z" fill="currentColor"/></svg>
+                        <svg width="22" height="12" viewBox="0 0 22 12"><rect x="0.5" y="1" width="18" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2.5" width="14" height="7" rx="1" fill="currentColor"/><rect x="19" y="4" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
+                    </span>
+                </div>
+
+                <!-- Навбар (плоский, как у WebView в нативном приложении) -->
+                <div style="position:relative;flex-shrink:0">
+                    <div class="navbar navbar--flat">
+                        <a class="navbar__btn" href="index.html" aria-label="Назад">
+                            <svg width="24" height="24"><use href="#i-chevron-left"></use></svg>
+                        </a>
+                        <h1 class="navbar__title">Помощь</h1>
+                        <button class="navbar__btn" aria-label="Поделиться">
+                            <svg width="24" height="24"><use href="#i-share"></use></svg>
+                        </button>
+                    </div>
+                    <div class="webview-badge">webview · cms</div>
+                </div>
+
+                <!-- Прокручиваемая простыня контента -->
+                <div class="page__scroll" id="scroll">
+                    <!-- Поиск-фильтр (опционально) -->
+                    <div class="wv-search">
+                        <label class="wv-search__field">
+                            <svg><use href="#i-search"></use></svg>
+                            <input
+                                id="wv-input"
+                                type="search"
+                                placeholder="Найти на странице"
+                                autocomplete="off"
+                                inputmode="search"
+                            />
+                        </label>
+                        <p class="wv-search__hint" id="wv-hint">Полнотекстовый поиск по статьям. Нажмите на раздел — раскроется ответ.</p>
+                    </div>
+
+                    <div id="wv-content"><!-- Лента генерится JS --></div>
+
+                    <div class="wv-empty" id="wv-empty">
+                        <h2 class="empty__title">Ничего не нашлось</h2>
+                        <p class="empty__desc">Попробуйте другой запрос или напишите в поддержку.</p>
+                    </div>
+
+                    <div class="wv-footer-cta">
+                        <h3>Не нашли ответ на свой вопрос?</h3>
+                        <p>Поддержка отвечает за 5 минут, 24/7.</p>
+                        <button id="wv-support">Написать в поддержку</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SVG-спрайт переиспользуем из основного index — копируем нужные symbol'ы -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <symbol id="i-chevron-right" viewBox="0 0 24 24">
+                <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-chevron-left" viewBox="0 0 24 24">
+                <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-search" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M16 16l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-share" viewBox="0 0 24 24">
+                <circle cx="6" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="18" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="18" cy="18" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M8 11l8-4M8 13l8 4" stroke="currentColor" stroke-width="1.6"/>
+            </symbol>
+            <symbol id="i-image" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="9" cy="10" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M3 18l5-5 5 5 3-3 5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </symbol>
+            <!-- Категории -->
+            <symbol id="cat-route" viewBox="0 0 24 24">
+                <path d="M6 4a3 3 0 100 6 3 3 0 000-6zm0 0v8M6 12c0 4 12 4 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M18 14a3 3 0 100 6 3 3 0 000-6z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            </symbol>
+            <symbol id="cat-payment" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M3 10h18" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M7 15h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="cat-document" viewBox="0 0 24 24">
+                <path d="M7 3h7l4 4v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M14 3v4h4M9 12h6M9 15h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="cat-return" viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 3-6.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M3 4v5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="cat-account" viewBox="0 0 24 24">
+                <circle cx="12" cy="9" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M5 20c1.6-4 4.6-5.5 7-5.5s5.4 1.5 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            </symbol>
+            <symbol id="cat-support" viewBox="0 0 24 24">
+                <path d="M4 12a8 8 0 0116 0v3a3 3 0 01-3 3h-1v-7h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 15v-3h4v7H7a3 3 0 01-3-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <script src="data.js?v=7"></script>
+    <script src="webview.js?v=7"></script>
+</body>
+</html>
