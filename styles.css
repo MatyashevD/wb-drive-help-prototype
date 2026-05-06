@@ -292,13 +292,11 @@ a {
     line-height: var(--font-line-action);
     font-weight: 600;
     color: var(--mo-text-icon-primary);
-    padding-right: 44px; /* визуальная компенсация левой кнопки */
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-.navbar__title--no-back {
-    padding-right: 0;
+    /* Симметрию обеспечивают две навбар-кнопки 44x44 слева и справа
+       (правая может быть невидимым placeholder'ом). */
 }
 
 /* Большая шапка профиля */

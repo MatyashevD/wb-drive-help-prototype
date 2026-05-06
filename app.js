@@ -109,7 +109,7 @@
                         ? `<button class="navbar__btn" data-back aria-label="Назад">${svgUse('i-chevron-left')}</button>`
                         : `<span class="navbar__btn" aria-hidden="true"></span>`
                 }
-                <h1 class="navbar__title ${!back ? 'navbar__title--no-back' : ''}">${esc(title)}</h1>
+                <h1 class="navbar__title">${esc(title)}</h1>
                 ${
                     share
                         ? `<button class="navbar__btn" aria-label="Поделиться">${svgUse('i-share')}</button>`
