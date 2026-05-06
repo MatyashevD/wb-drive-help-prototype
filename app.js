@@ -76,8 +76,12 @@
         return [...data.articles].sort((a, b) => b.popularity - a.popularity).slice(0, limit);
     }
 
-    function svgUse(id) {
-        return `<svg><use href="#${id}"></use></svg>`;
+    function svgUse(id, size = 24) {
+        // Размер прописываем прямо в HTML-атрибутах: даже если CSS не успел
+        // загрузиться/закеширован — иконка всё равно отрисуется правильно.
+        // Кастомные размеры через CSS-селекторы (.featured__icon svg и т.д.)
+        // имеют высшую специфичность и переопределят это значение.
+        return `<svg width="${size}" height="${size}" aria-hidden="true"><use href="#${id}"></use></svg>`;
     }
 
     // ───────────────────────────────────────────────────────────
