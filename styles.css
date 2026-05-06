@@ -536,13 +536,18 @@ a {
 .tabs__row::-webkit-scrollbar {
     display: none;
 }
+/*
+   Состояния по дизайн-системе WB Drive:
+   — Primary action (активный таб): bg #A73AFD, text #FFFFFF
+   — Secondary (неактивный таб):    bg #F6F6F9, text #A73AFD
+*/
 .tabchip {
     flex-shrink: 0;
     height: 36px;
     padding: 0 14px;
     border-radius: var(--mo-CRpill);
-    background: var(--mo-bg-level-1-base);
-    color: var(--mo-text-icon-secondary);
+    background: var(--mo-bg-level-2);
+    color: var(--mo-accent-purple);
     font-size: var(--font-size-body);
     line-height: var(--font-line-body);
     font-weight: 500;
@@ -554,8 +559,8 @@ a {
     background: var(--mo-bg-level-3);
 }
 .tabchip.is-active {
-    background: var(--mo-text-icon-primary);
-    color: #fff;
+    background: var(--mo-accent-purple);
+    color: #ffffff;
 }
 
 .tab-intro {
