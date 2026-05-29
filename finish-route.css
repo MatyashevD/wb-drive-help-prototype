@@ -1,0 +1,1221 @@
+/* ============================================================
+   WB Drive · Прототип кнопки «Завершить» на маршруте Склад→ПВЗ
+   Доп. стили поверх общего styles.css (токены из :root).
+   ============================================================ */
+
+:root {
+    --fr-destructive-fg: #e53935;
+    --fr-destructive-bg: #fff0f0;
+    --fr-success-fg: #1aa260;
+    --fr-success-bg: #e5f6ed;
+    --fr-progress-track: #efeff4;
+    --fr-progress-fill: var(--mo-accent-purple);
+    --fr-emergency-fg: #c92a2a;
+    --fr-emergency-bg: #fff0f0;
+    --fr-emergency-bg-soft: #fff8f8;
+}
+
+/* ============================================================
+   Переключатель состояний (демо-плашка над фреймом)
+   ============================================================ */
+.state-switcher {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    padding: 10px 14px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 12px;
+    line-height: 16px;
+    align-items: center;
+    gap: 12px;
+}
+@media (min-width: 600px) {
+    .state-switcher {
+        display: inline-flex;
+    }
+}
+.state-switcher__label {
+    color: #b8b8c4;
+    white-space: nowrap;
+}
+.state-switcher__buttons {
+    display: flex;
+    gap: 4px;
+}
+.state-switcher__btn {
+    padding: 6px 12px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 12px;
+    line-height: 16px;
+    transition: background 0.15s;
+}
+.state-switcher__btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+}
+.state-switcher__btn.is-active {
+    background: var(--mo-accent-purple);
+    font-weight: 600;
+}
+.state-switcher__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.state-switcher__divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 4px;
+}
+.state-switcher__group-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    padding: 0 4px;
+    align-self: center;
+}
+
+/* ============================================================
+   Топ-бар: «Разгрузка №…»
+   ============================================================ */
+.fr-topbar {
+    background: var(--mo-bg-level-1-base);
+    padding: 12px 16px 14px;
+    text-align: center;
+    position: relative;
+    flex-shrink: 0;
+}
+.fr-topbar__title {
+    font-size: var(--font-size-action);
+    line-height: var(--font-line-action);
+    font-weight: 600;
+    color: var(--mo-text-icon-primary);
+}
+.fr-topbar__subtitle {
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--mo-text-icon-secondary);
+}
+.fr-topbar__actions {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+}
+.fr-topbar__action {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--mo-accent-purple);
+}
+.fr-topbar__action svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ============================================================
+   Сегмент-табы «Список ПВЗ / Карта / Возвраты»
+   ============================================================ */
+.fr-segments {
+    margin: 4px 12px 8px;
+    background: var(--mo-bg-level-1-base);
+    border-radius: 16px;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.fr-segment {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 500;
+    color: var(--mo-text-icon-secondary);
+    transition: background 0.15s, color 0.15s;
+}
+.fr-segment.is-active {
+    background: var(--mo-bg-level-2);
+    color: var(--mo-text-icon-primary);
+    font-weight: 600;
+}
+.fr-segment__badge {
+    display: inline-block;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: 4px;
+    border-radius: 9px;
+    background: #fff4d6;
+    color: #b07900;
+    font-size: 11px;
+    line-height: 18px;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: 1px;
+}
+
+/* ============================================================
+   Прогресс-карточка (выгружено / ТТН)
+   ============================================================ */
+.fr-progress-row {
+    display: flex;
+    gap: 8px;
+    margin: 0 12px 8px;
+}
+.fr-progress {
+    flex: 1.6;
+    background: var(--mo-bg-level-1-base);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.fr-progress__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.fr-progress__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--mo-bg-level-2);
+    display: grid;
+    place-items: center;
+    color: var(--mo-text-icon-secondary);
+    flex-shrink: 0;
+}
+.fr-progress__icon svg {
+    width: 22px;
+    height: 22px;
+}
+.fr-progress.is-complete .fr-progress__icon {
+    background: var(--fr-success-bg);
+    color: var(--fr-success-fg);
+}
+.fr-progress__numbers {
+    display: flex;
+    flex-direction: column;
+}
+.fr-progress__count {
+    font-size: 22px;
+    line-height: 26px;
+    font-weight: 700;
+    color: var(--mo-text-icon-primary);
+    transition: color 0.2s;
+}
+.fr-progress.is-complete .fr-progress__count {
+    color: var(--fr-success-fg);
+}
+.fr-progress__label {
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--mo-text-icon-secondary);
+}
+.fr-progress__bar {
+    height: 6px;
+    background: var(--fr-progress-track);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.fr-progress__fill {
+    height: 100%;
+    width: 0%;
+    background: var(--fr-progress-fill);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.25, 0.8, 0.4, 1), background 0.3s;
+}
+.fr-progress.is-complete .fr-progress__fill {
+    background: var(--fr-success-fg);
+}
+
+.fr-ttn {
+    flex: 1;
+    background: var(--mo-bg-level-1-base);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.fr-ttn__title {
+    font-size: 17px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--mo-text-icon-primary);
+}
+.fr-ttn__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--mo-text-icon-secondary);
+}
+.fr-ttn__caption {
+    font-size: 13px;
+    line-height: 16px;
+}
+.fr-ttn__download {
+    color: var(--mo-accent-purple);
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+}
+.fr-ttn__download svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================================
+   Карточка точки разгрузки
+   ============================================================ */
+.fr-point {
+    background: var(--mo-bg-level-1-base);
+    border-radius: 16px;
+    margin: 0 12px 8px;
+    padding: 16px;
+    transition: opacity 0.3s;
+}
+.fr-point.is-completed {
+    opacity: 0.62;
+}
+.fr-point__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.fr-point__title {
+    font-size: 19px;
+    line-height: 23px;
+    font-weight: 700;
+    color: var(--mo-text-icon-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.fr-point__status {
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--fr-success-bg);
+    color: var(--fr-success-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.fr-point__status svg {
+    width: 14px;
+    height: 14px;
+}
+.fr-point__info-btn {
+    width: 24px;
+    height: 24px;
+    color: var(--mo-accent-purple);
+    display: grid;
+    place-items: center;
+}
+.fr-point__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: var(--mo-text-icon-primary);
+}
+.fr-point__row svg {
+    width: 22px;
+    height: 22px;
+    color: var(--mo-text-icon-secondary);
+    flex-shrink: 0;
+}
+.fr-point__row-main {
+    font-size: 15px;
+    line-height: 20px;
+}
+.fr-point__row-sub {
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--mo-text-icon-secondary);
+}
+
+.fr-point__action {
+    margin-top: 8px;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--mo-accent-purple-soft);
+    color: var(--mo-accent-purple);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    text-align: center;
+    transition: background 0.15s;
+}
+.fr-point__action:active {
+    background: rgba(167, 58, 253, 0.16);
+}
+.fr-point.is-current .fr-point__action {
+    background: var(--mo-accent-purple);
+    color: #fff;
+}
+.fr-point.is-current .fr-point__action:active {
+    background: #8e2cdc;
+}
+
+/* ============================================================
+   Заглушка-стейт (Карта, пустые возвраты)
+   ============================================================ */
+.fr-empty-tab {
+    text-align: center;
+    padding: 60px 32px;
+    color: var(--mo-text-icon-secondary);
+}
+.fr-empty-tab svg {
+    width: 48px;
+    height: 48px;
+    color: var(--mo-text-icon-tertiary);
+    margin-bottom: 16px;
+}
+.fr-empty-tab__title {
+    font-size: 17px;
+    line-height: 22px;
+    font-weight: 600;
+    color: var(--mo-text-icon-primary);
+    margin-bottom: 6px;
+}
+.fr-empty-tab__sub {
+    font-size: 14px;
+    line-height: 19px;
+    color: var(--mo-text-icon-secondary);
+}
+
+/* ============================================================
+   Прогресс возвратов (на табе Возвраты)
+   ============================================================ */
+.fr-returns-progress {
+    margin: 4px 12px 8px;
+}
+.fr-returns-progress .fr-progress {
+    padding: 14px 16px;
+}
+
+/* Иконка склада (WB) */
+.fr-warehouse-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--mo-accent-purple-soft);
+    color: var(--mo-accent-purple);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.fr-warehouse-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Disabled-вариант кнопки внутри карточки (когда не на складе ещё) */
+.fr-point__action--ghost {
+    background: var(--mo-accent-purple-soft);
+    color: var(--mo-accent-purple);
+}
+
+/* ============================================================
+   Вариант B досрочного завершения — красная иконка-кнопка «⚠»
+   слева от Навигатора. Цвет destructive — чтобы было понятно,
+   что это опасное действие, требующее подтверждения.
+   ============================================================ */
+.fr-finish-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(229, 57, 53, 0.10);
+    color: var(--fr-destructive-fg);
+    border: none;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.fr-finish-icon:hover {
+    background: rgba(229, 57, 53, 0.16);
+}
+.fr-finish-icon:active {
+    transform: scale(0.96);
+}
+.fr-finish-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* «Все точки разгрузки» — раскрывашка */
+.fr-all-points {
+    margin: 8px 12px 140px;
+    padding: 14px 16px;
+    background: var(--mo-bg-level-1-base);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--mo-text-icon-primary);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 500;
+}
+.fr-all-points__icon {
+    width: 24px;
+    height: 24px;
+    color: var(--mo-accent-purple);
+}
+.fr-all-points__count {
+    margin-left: auto;
+    color: var(--mo-text-icon-secondary);
+    font-size: 13px;
+    font-weight: 400;
+}
+.fr-all-points__chevron {
+    color: var(--mo-text-icon-tertiary);
+    transition: transform 0.2s;
+}
+.fr-all-points.is-open .fr-all-points__chevron {
+    transform: rotate(180deg);
+}
+
+.fr-all-points-list {
+    margin: -4px 12px 140px;
+    background: var(--mo-bg-level-1-base);
+    border-radius: 0 0 16px 16px;
+    padding: 0 16px 12px;
+    display: none;
+}
+.fr-all-points-list.is-open {
+    display: block;
+}
+.fr-all-points-list__item {
+    padding: 12px 0;
+    border-top: 1px solid var(--mo-separator-default);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.fr-all-points-list__num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--mo-bg-level-2);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mo-text-icon-secondary);
+    flex-shrink: 0;
+}
+.fr-all-points-list__item.is-done .fr-all-points-list__num {
+    background: var(--fr-success-bg);
+    color: var(--fr-success-fg);
+}
+.fr-all-points-list__item.is-done .fr-all-points-list__num svg {
+    width: 16px;
+    height: 16px;
+}
+.fr-all-points-list__main {
+    flex: 1;
+    min-width: 0;
+}
+.fr-all-points-list__addr {
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 500;
+    color: var(--mo-text-icon-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.fr-all-points-list__sub {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--mo-text-icon-secondary);
+    margin-top: 1px;
+}
+
+/* ============================================================
+   Нижняя плашка: «Завершить» + «Навигатор»
+   Логика веса:
+     • маршрут идёт → «Навигатор» primary 100%, «Завершить» — мелкий link сверху
+     • маршрут закончен → «Завершить маршрут» primary 100%, navigator уходит в icon-only
+   ============================================================ */
+.fr-bottom-actions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 56px; /* над тапбаром */
+    padding: 8px 12px 12px;
+    background: linear-gradient(180deg, rgba(246, 246, 249, 0) 0%, var(--mo-bg-level--1) 28%, var(--mo-bg-level--1) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    z-index: 3;
+}
+
+/* «Завершить досрочно ›» — мелкая текстовая ссылка над навигатором */
+.fr-finish-link {
+    align-self: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--fr-destructive-fg);
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.85;
+    transition: background 0.15s, opacity 0.15s;
+}
+.fr-finish-link:active {
+    background: var(--fr-destructive-bg);
+    opacity: 1;
+}
+.fr-finish-link svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+/* Когда осталась последняя точка — link становится чуть заметнее */
+.fr-finish-link--accent {
+    background: var(--fr-destructive-bg);
+    opacity: 1;
+}
+.fr-finish-link--accent:active {
+    background: #ffe2e2;
+}
+
+/* Большой Navigator — primary действие на маршруте */
+.fr-bottom-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+.fr-navigator {
+    flex: 1;
+    height: 56px;
+    padding: 0 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #b950ff 0%, #8a2be2 100%);
+    color: #fff;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 6px 16px rgba(138, 43, 226, 0.32);
+}
+.fr-navigator svg {
+    width: 22px;
+    height: 22px;
+}
+.fr-navigator:active {
+    background: linear-gradient(135deg, #a347e8 0%, #7a23c8 100%);
+}
+
+/* Когда маршрут закончен — primary меняется местами:
+   navigator → icon-only secondary, завершить → primary green */
+.fr-navigator--icon {
+    flex: 0 0 56px;
+    width: 56px;
+    min-width: 56px;
+    padding: 0;
+    background: var(--mo-bg-level-1-base);
+    color: var(--mo-accent-purple);
+    box-shadow: none;
+    border: 1px solid var(--mo-separator-default);
+}
+.fr-navigator--icon:active {
+    background: var(--mo-bg-level-2);
+}
+.fr-navigator--icon span {
+    display: none;
+}
+
+.fr-finish-primary {
+    flex: 1;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--fr-success-fg);
+    color: #fff;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 6px 16px rgba(26, 162, 96, 0.32);
+    transition: background 0.15s;
+}
+.fr-finish-primary:active {
+    background: #168c52;
+}
+.fr-finish-primary svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ============================================================
+   Тапбар (общий стиль из основного прототипа, повторяем чтобы быть автономными)
+   ============================================================ */
+.fr-tabbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--mo-bg-level-1-base);
+    border-top: 1px solid var(--mo-separator-default);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 16px;
+    z-index: 4;
+}
+.fr-tabbar__item {
+    flex: 1;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--mo-tabbar-inactive);
+    transition: color 0.15s;
+}
+.fr-tabbar__item.is-active {
+    color: var(--mo-accent-purple);
+}
+.fr-tabbar__item svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* ============================================================
+   Bottom sheet (общая разметка для всех 3 веток)
+   ============================================================ */
+.fr-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 20, 28, 0);
+    pointer-events: none;
+    transition: background 0.25s;
+    z-index: 10;
+}
+.fr-backdrop.is-open {
+    background: rgba(20, 20, 28, 0.45);
+    pointer-events: auto;
+}
+
+.fr-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--mo-bg-level-1-base);
+    border-radius: 24px 24px 0 0;
+    padding: 8px 0 24px;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
+    z-index: 11;
+    max-height: 90%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.fr-sheet.is-open {
+    transform: translateY(0);
+}
+.fr-sheet__handle {
+    width: 36px;
+    height: 4px;
+    background: var(--mo-controls-secondary-default);
+    border-radius: 2px;
+    margin: 6px auto 16px;
+}
+.fr-sheet__header {
+    padding: 0 20px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.fr-sheet__title {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 700;
+    color: var(--mo-text-icon-primary);
+}
+.fr-sheet__close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--mo-bg-level-2);
+    display: grid;
+    place-items: center;
+    color: var(--mo-text-icon-secondary);
+    flex-shrink: 0;
+}
+.fr-sheet__close svg {
+    width: 20px;
+    height: 20px;
+}
+.fr-sheet__body {
+    padding: 8px 20px 0;
+}
+.fr-sheet__back {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--mo-bg-level-2);
+    display: grid;
+    place-items: center;
+    color: var(--mo-text-icon-primary);
+    flex-shrink: 0;
+    margin-right: -4px;
+}
+.fr-sheet__back svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Шаг 1: причины */
+.fr-cause {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 16px;
+    background: var(--mo-bg-level-2);
+    margin-bottom: 8px;
+    text-align: left;
+    width: 100%;
+    transition: background 0.15s;
+}
+.fr-cause:active {
+    background: var(--mo-bg-level-3);
+}
+.fr-cause--emergency {
+    background: var(--fr-emergency-bg-soft);
+    border: 1px solid rgba(229, 57, 53, 0.16);
+}
+.fr-cause--emergency:active {
+    background: var(--fr-emergency-bg);
+}
+.fr-cause--cancel {
+    background: var(--mo-bg-level-1-base);
+    border: 1px solid var(--mo-separator-default);
+}
+.fr-cause__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.fr-cause__icon svg {
+    width: 24px;
+    height: 24px;
+}
+.fr-cause--emergency .fr-cause__icon {
+    background: var(--fr-emergency-bg);
+    color: var(--fr-emergency-fg);
+}
+.fr-cause--planned .fr-cause__icon {
+    background: #fff4d6;
+    color: #b07900;
+}
+.fr-cause--cancel .fr-cause__icon {
+    background: var(--mo-bg-level-2);
+    color: var(--mo-accent-purple);
+}
+.fr-cause__text {
+    flex: 1;
+    min-width: 0;
+}
+.fr-cause__title {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--mo-text-icon-primary);
+}
+.fr-cause__sub {
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--mo-text-icon-secondary);
+    margin-top: 2px;
+}
+.fr-cause__arrow {
+    align-self: center;
+    color: var(--mo-text-icon-tertiary);
+    flex-shrink: 0;
+}
+
+/* Шаг 2: ЧП */
+.fr-emergency-callout {
+    background: var(--fr-emergency-bg-soft);
+    border: 1px solid rgba(229, 57, 53, 0.18);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+.fr-emergency-callout__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--fr-emergency-bg);
+    color: var(--fr-emergency-fg);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.fr-emergency-callout__text {
+    font-size: 14px;
+    line-height: 19px;
+    color: var(--mo-text-icon-primary);
+}
+.fr-emergency-callout__text b {
+    color: var(--fr-emergency-fg);
+}
+.fr-call-btn {
+    width: 100%;
+    height: 60px;
+    border-radius: 16px;
+    background: var(--fr-emergency-fg);
+    color: #fff;
+    font-size: 18px;
+    line-height: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 6px 18px rgba(201, 42, 42, 0.32);
+    transition: background 0.15s;
+}
+.fr-call-btn:active {
+    background: #a01d1d;
+}
+.fr-call-btn svg {
+    width: 24px;
+    height: 24px;
+}
+.fr-call-hint {
+    text-align: center;
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--mo-text-icon-secondary);
+    margin: 16px 0 10px;
+}
+
+/* «Позвонить 112» — вторичная под primary-кнопкой «Сообщить о ЧП» */
+.fr-112-btn {
+    margin-top: 8px;
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--mo-bg-level-1-base);
+    color: var(--fr-emergency-fg);
+    border: 1px solid rgba(229, 57, 53, 0.24);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+}
+.fr-112-btn:active {
+    background: var(--fr-emergency-bg);
+}
+.fr-112-btn svg {
+    width: 20px;
+    height: 20px;
+}
+.fr-info-line {
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    background: var(--mo-bg-level-2);
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--mo-text-icon-secondary);
+    display: flex;
+    gap: 8px;
+}
+.fr-info-line svg {
+    width: 18px;
+    height: 18px;
+    color: var(--mo-text-icon-secondary);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.fr-info-line b {
+    color: var(--mo-text-icon-primary);
+    font-weight: 600;
+}
+/* Warning-вариант: жёлтый, привлекающий внимание */
+.fr-info-line--warning {
+    background: #fff4d6;
+    color: #6b4d00;
+}
+.fr-info-line--warning b {
+    color: #4d3700;
+}
+.fr-info-line--warning svg {
+    color: #b07900;
+}
+
+/* Шаг 2: «Не могу продолжать» — список неразгруженных */
+.fr-undone-summary {
+    background: var(--mo-bg-level-2);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+.fr-undone-summary__title {
+    font-size: 14px;
+    line-height: 18px;
+    color: var(--mo-text-icon-secondary);
+    margin-bottom: 4px;
+}
+.fr-undone-summary__count {
+    font-size: 17px;
+    line-height: 22px;
+    font-weight: 700;
+    color: var(--mo-text-icon-primary);
+}
+.fr-undone-list {
+    background: var(--mo-bg-level-2);
+    border-radius: 16px;
+    padding: 4px 0;
+    margin-bottom: 12px;
+}
+.fr-undone-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+}
+.fr-undone-item + .fr-undone-item {
+    border-top: 1px solid var(--mo-separator-default);
+}
+.fr-undone-item__num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--mo-bg-level-1-base);
+    color: var(--mo-text-icon-secondary);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.fr-undone-item__main {
+    flex: 1;
+    min-width: 0;
+}
+.fr-undone-item__addr {
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 500;
+    color: var(--mo-text-icon-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.fr-undone-item__boxes {
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--fr-destructive-fg);
+    margin-top: 1px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   Slide-to-confirm — реальный drag-жест
+   ============================================================ */
+.fr-slide {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    border-radius: 16px;
+    background: var(--mo-bg-level-2);
+    overflow: hidden;
+    user-select: none;
+    touch-action: pan-y;
+    margin-top: 8px;
+}
+.fr-slide__track-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--mo-text-icon-secondary);
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.fr-slide__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    background: linear-gradient(90deg, rgba(229, 57, 53, 0.12) 0%, rgba(229, 57, 53, 0.05) 100%);
+    transition: width 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.fr-slide__handle {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--fr-destructive-fg);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.32);
+    cursor: grab;
+    transition: transform 0.05s linear;
+    touch-action: none;
+}
+.fr-slide__handle:active {
+    cursor: grabbing;
+}
+.fr-slide__handle svg {
+    width: 24px;
+    height: 24px;
+}
+.fr-slide.is-armed .fr-slide__handle {
+    background: var(--fr-destructive-fg);
+}
+.fr-slide.is-confirmed .fr-slide__fill {
+    width: 100% !important;
+    background: var(--fr-destructive-fg);
+}
+.fr-slide.is-confirmed .fr-slide__track-text {
+    opacity: 0;
+}
+.fr-slide.is-confirmed .fr-slide__handle {
+    transform: translateX(calc(100% + 100vw)) !important;
+    opacity: 0;
+}
+
+/* «Вернуться к маршруту» — нейтральная вторичная кнопка */
+.fr-cancel-link {
+    margin-top: 14px;
+    width: 100%;
+    padding: 14px;
+    text-align: center;
+    color: var(--mo-text-icon-secondary);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   Success-экран
+   ============================================================ */
+.fr-success {
+    position: absolute;
+    inset: 0;
+    background: var(--mo-bg-level--1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+.fr-success.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.fr-success__icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--fr-success-bg);
+    color: var(--fr-success-fg);
+    display: grid;
+    place-items: center;
+    margin-bottom: 20px;
+}
+.fr-success__icon.is-emergency {
+    background: var(--fr-emergency-bg);
+    color: var(--fr-emergency-fg);
+}
+.fr-success__icon.is-warning {
+    background: #fff4d6;
+    color: #b07900;
+}
+.fr-success__icon svg {
+    width: 48px;
+    height: 48px;
+}
+.fr-success__title {
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 700;
+    color: var(--mo-text-icon-primary);
+    margin-bottom: 10px;
+}
+.fr-success__sub {
+    font-size: 15px;
+    line-height: 20px;
+    color: var(--mo-text-icon-secondary);
+    margin-bottom: 24px;
+    max-width: 280px;
+}
+.fr-success__btn {
+    margin-top: 16px;
+    padding: 14px 28px;
+    background: var(--mo-accent-purple);
+    color: #fff;
+    border-radius: 14px;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+}

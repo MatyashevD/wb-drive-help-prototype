@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f6f9" />
+    <title>WB Drive — кнопка «Завершить» (прототип)</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css?v=8" />
+    <link rel="stylesheet" href="finish-route.css?v=7" />
+</head>
+<body>
+    <!-- Подсказка для десктопа -->
+    <aside class="desk-hint" aria-hidden="true">
+        <div class="desk-hint__inner">
+            <strong>WB Drive · Кнопка «Завершить»</strong>
+            <span>Прототип адаптивной кнопки + bottom sheet «Что произошло?» — защита от случайных нажатий и поддержка ЧП-кейсов на маршруте.</span>
+        </div>
+    </aside>
+
+    <!-- Переключатель состояний прогресса (виден только на десктопе) -->
+    <div class="state-switcher" id="stateSwitcher" aria-label="Демо-состояния">
+        <span class="state-switcher__label">Прогресс маршрута:</span>
+        <div class="state-switcher__buttons" id="stateButtons"></div>
+    </div>
+
+    <!-- Мобильный фрейм -->
+    <div class="phone" id="phone">
+        <div class="phone__screen" id="screen">
+            <!-- Контент рендерится JS -->
+        </div>
+    </div>
+
+    <!-- SVG sprite -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <!-- Базовые -->
+            <symbol id="i-search" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M16 16l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-refresh" viewBox="0 0 24 24">
+                <path d="M4 12a8 8 0 1 1 2.34 5.66" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4 19v-5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-close" viewBox="0 0 24 24">
+                <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-chevron-down" viewBox="0 0 24 24">
+                <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-chevron-right" viewBox="0 0 24 24">
+                <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-info" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                <path d="M12 11v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-arrow-down" viewBox="0 0 24 24">
+                <path d="M12 4v14m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+
+            <!-- Иконки точки -->
+            <symbol id="i-shop" viewBox="0 0 24 24">
+                <path d="M4 8h16l-1 4H5L4 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M5 12v8h14v-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M4 8l2-4h12l2 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M10 20v-4h4v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-warehouse" viewBox="0 0 24 24">
+                <path d="M3 10l9-5 9 5v9a1 1 0 01-1 1H4a1 1 0 01-1-1v-9z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <rect x="8" y="13" width="8" height="7" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M8 17h8" stroke="currentColor" stroke-width="1.6"/>
+                <text x="12" y="9" font-family="Inter" font-size="3.5" font-weight="700" text-anchor="middle" fill="currentColor">WB</text>
+            </symbol>
+            <symbol id="i-box" viewBox="0 0 24 24">
+                <path d="M3 7l9-4 9 4-9 4-9-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M3 7v10l9 4 9-4V7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M12 11v10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            </symbol>
+            <symbol id="i-route" viewBox="0 0 24 24">
+                <path d="M7 4a2 2 0 110 4 2 2 0 010-4z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M7 8c0 4 10 4 10 8a2 2 0 11-4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M17 18a2 2 0 110-4 2 2 0 010 4z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            </symbol>
+            <symbol id="i-clock" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-file" viewBox="0 0 24 24">
+                <path d="M7 3h7l4 4v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M9 13h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Статусы точек -->
+            <symbol id="i-check" viewBox="0 0 24 24">
+                <path d="M5 12l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-dot" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4" fill="currentColor"/>
+            </symbol>
+
+            <!-- Тревога / навигация -->
+            <symbol id="i-warning" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M12 7v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16.5" r="1.1" fill="currentColor"/>
+            </symbol>
+            <symbol id="i-navigator" viewBox="0 0 24 24">
+                <path d="M3 11l18-7-7 18-2.5-8L3 11z" fill="currentColor"/>
+            </symbol>
+            <symbol id="i-phone" viewBox="0 0 24 24">
+                <path d="M5 4h3l2 5-2.5 1.5a11 11 0 005 5L14 13l5 2v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z" fill="currentColor"/>
+            </symbol>
+            <symbol id="i-back" viewBox="0 0 24 24">
+                <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-arrow-right" viewBox="0 0 24 24">
+                <path d="M5 12h14m0 0l-6-6m6 6l-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-confetti" viewBox="0 0 24 24">
+                <path d="M5 19l4-12 8 6-12 6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M16 4l1 2M19 7l2 1M18 11l2-1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Иконки тапбара (из основного прототипа) -->
+            <symbol id="i-briefcase" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M10 15c0 .5523.4477 1 1 1h2c.5523 0 1-.4477 1-1h6c.5523 0 1 .4477 1 1v4c0 1.1046-.8954 2-2 2H5c-1.1046 0-2-.8954-2-2v-4c0-.5523.4477-1 1-1h6zm4-13c1.6568 0 3 1.3432 3 3v2h3c1.1046 0 2 .8954 2 2v2c0 1.1046-.8954 2-2 2h-6c0-.5523-.4477-1-1-1h-2c-.5523 0-1 .4477-1 1H4c-1.1046 0-2-.8954-2-2V9c0-1.1046.8954-2 2-2h3V5c0-1.6568 1.3432-3 3-3zm0 2h-4c-.5523 0-1 .4477-1 1v2h6V5c0-.5523-.4477-1-1-1z" clip-rule="evenodd"/>
+            </symbol>
+            <symbol id="i-wallet" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M17.1094 2.8083c1.0595-.0952 2.0086.6559 2.1592 1.7089.0078.0547-.0329.1052-.0879.1094L4.8584 5.7341c-.6897.0874-.8584.4926-.8584.9902 0 .7044.571 1.2752 1.2754 1.2754H20c1.1045 0 1.9998.8956 2 2v10c0 1.1046-.8954 2-2 2H4c-1.1046 0-2-.8954-2-2V6.7243c0-1.4929.6067-2.7244 2.5762-2.9697zM18.0117 13c-1.12 0-2.0117.8917-2.0117 2.0114 0 1.12.8917 1.9883 2.0117 1.9883C19.1316 16.9995 20 16.1313 20 15.0114c0-1.1199-.8684-2.0116-1.9883-2.0117z" clip-rule="evenodd"/>
+            </symbol>
+            <symbol id="i-chat" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M12 2c5.1276 0 9.9998 2.556 10 8.333-.6507 7.4835-6.6374 10.3936-9.2295 11.3096-.6014.2124-1.1875-.246-1.1875-.8838v-1.0479c-.0001-.5692-.4713-1.0322-1.0391-1.0742C8.0629 18.4532 2 17.2927 2 10.333 2.0002 4.556 6.8724 2 12 2zM7 11c-.5523 0-1 .4477-1 1s.4477 1 1 1h6c.5523 0 1-.4477 1-1s-.4477-1-1-1H7zm0-4c-.5523 0-1 .4477-1 1 0 .5523.4477 1 1 1h10c.5523 0 1-.4477 1-1 0-.5523-.4477-1-1-1H7z" clip-rule="evenodd"/>
+            </symbol>
+            <symbol id="i-profile-tab" viewBox="0 0 20 20">
+                <path fill="currentColor" d="M14.3441 5.2632C14.3441 2.6565 13.2581 0 9.9999 0C6.7418 0 5.6557 2.6079 5.6557 5.2632C5.6557 7.9184 7.5808 10 9.9999 10C12.4191 10 14.3441 7.8698 14.3441 5.2632Z"/>
+                <path fill="currentColor" d="M20 18.1818C20 19.186 19.186 20 18.1818 20H1.8182C0.814 20 0 19.186 0 18.1818V17.7234C0.0655 16.7769 0.5023 15.7455 1.1711 15.0592C2.5785 13.6149 5.5463 11.8182 10 11.8182C14.8804 11.8182 17.7497 13.7285 19.0092 15.1614C19.5612 15.7895 19.9427 16.8966 20 17.7234V18.1818Z"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <script src="finish-route.js?v=7"></script>
+</body>
+</html>
