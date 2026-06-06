@@ -1101,102 +1101,54 @@
 }
 .fr-incident {
     text-align: center;
+    padding-top: 4px;
     padding-bottom: 4px;
 }
-.fr-incident__icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: #fff4e0;
-    color: #f08c00;
-    display: grid;
-    place-items: center;
-    margin: 4px auto 16px;
-}
-.fr-incident__icon svg {
-    width: 32px;
-    height: 32px;
-}
 .fr-incident__title {
-    font-size: 20px;
-    line-height: 25px;
+    font-size: 21px;
+    line-height: 26px;
     font-weight: 700;
     color: var(--mo-text-icon-primary);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
-.fr-incident__sub {
+/* Пояснение про коробки — тихий вторичный текст, без плашки */
+.fr-incident__note {
     font-size: 14px;
     line-height: 19px;
     color: var(--mo-text-icon-secondary);
-    margin-bottom: 20px;
+    margin-bottom: 22px;
     padding: 0 4px;
 }
-.fr-incident__callout {
+/* Поддержка и отмена — негромкие текстовые ссылки под свайпом */
+.fr-incident__links {
     display: flex;
-    gap: 12px;
-    text-align: left;
-    background: #fff8e6;
-    border: 1px solid rgba(176, 121, 0, 0.16);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: 14px;
 }
-.fr-incident__callout-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #fff4d6;
-    color: #f08c00;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-}
-.fr-incident__callout-icon svg {
-    width: 18px;
-    height: 18px;
-}
-.fr-incident__callout-text {
-    font-size: 14px;
-    line-height: 19px;
-    color: #6b4d00;
-}
-.fr-incident__callout-text b {
-    color: #5a4000;
-    font-weight: 700;
-}
-
-/* «Написать в поддержку» — вторичная helpful-кнопка над свайпом */
-.fr-support-btn {
+.fr-incident__link {
     width: 100%;
-    height: 52px;
-    border-radius: 16px;
-    background: var(--mo-accent-purple-soft);
-    color: var(--mo-accent-purple);
+    padding: 12px;
+    text-align: center;
+    background: none;
     border: none;
-    font-size: 16px;
+    cursor: pointer;
+    font-size: 15px;
     line-height: 20px;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    margin-bottom: 14px;
-    transition: background 0.15s ease, transform 0.1s ease;
+    color: var(--mo-accent-purple);
+    transition: opacity 0.15s ease;
 }
-.fr-support-btn:hover {
-    background: rgba(167, 58, 253, 0.16);
+.fr-incident__link:active {
+    opacity: 0.6;
 }
-.fr-support-btn:active {
-    transform: scale(0.99);
-}
-.fr-support-btn.is-done {
-    background: var(--fr-success-bg);
+.fr-incident__link.is-done {
     color: var(--fr-success-fg);
 }
-.fr-support-btn svg {
-    width: 22px;
-    height: 22px;
+.fr-incident__link--muted {
+    color: var(--mo-text-icon-secondary);
+    font-weight: 500;
 }
 
 /* ============================================================

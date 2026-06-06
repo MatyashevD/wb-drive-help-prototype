@@ -702,28 +702,17 @@
                 <button class="fr-sheet__close" id="sheetClose" aria-label="Закрыть">${svg('i-close', 20)}</button>
             </div>
             <div class="fr-sheet__body fr-incident">
-                <div class="fr-incident__icon">${svg('i-warning', 32)}</div>
-                <div class="fr-incident__title">У вас что-то случилось?</div>
-                <div class="fr-incident__sub">
-                    Если не можете продолжать поездку — завершите её здесь.
-                    Мы отправим уведомление экспедитору, он подскажет, что делать дальше.
+                <div class="fr-incident__title">Завершить поездку досрочно?</div>
+                <div class="fr-incident__note">
+                    ${atDriver > 0 ? `${atDriver} ${pluralize(atDriver, 'коробка останется', 'коробки останутся', 'коробок останутся')} за вами` : 'Коробки останутся за вами'} — экспедитор организует их возврат на склад через другого водителя.
                 </div>
 
-                <div class="fr-incident__callout">
-                    <div class="fr-incident__callout-icon">${svg('i-warning', 22)}</div>
-                    <div class="fr-incident__callout-text">
-                        <b>Коробки числятся за вами${atDriver > 0 ? ` — ${atDriver} ${pluralize(atDriver, 'шт', 'шт', 'шт')}` : ''}</b><br>
-                        Экспедитор организует возврат на склад через другого водителя.
-                    </div>
+                ${renderSlideToConfirm('Завершить поездку', { destructive: true })}
+
+                <div class="fr-incident__links">
+                    <button class="fr-incident__link" id="supportBtn">Нужна помощь? Написать в поддержку</button>
+                    <button class="fr-incident__link fr-incident__link--muted" id="sheetClose2">Отмена</button>
                 </div>
-
-                <button class="fr-support-btn" id="supportBtn">
-                    ${svg('i-chat', 22)} Написать в поддержку
-                </button>
-
-                ${renderSlideToConfirm('Завершить поездку', { hint: 'Проведите слева направо', destructive: true })}
-
-                <button class="fr-cancel-link" id="sheetClose2">Отмена</button>
             </div>
         `;
     }
@@ -1070,7 +1059,7 @@
         const supportBtn = document.getElementById('supportBtn');
         if (supportBtn) {
             supportBtn.addEventListener('click', () => {
-                supportBtn.innerHTML = `${svg('i-check', 22)} Открываем чат поддержки…`;
+                supportBtn.textContent = 'Открываем чат поддержки…';
                 supportBtn.classList.add('is-done');
                 supportBtn.disabled = true;
             });
