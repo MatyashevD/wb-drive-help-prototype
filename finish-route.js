@@ -38,8 +38,13 @@
         hasReturns: false,   // флаг: в поездку входят возвраты на склад
         atWarehouse: false,  // флаг: водитель прибыл на склад и сдал возвраты
         activeTab: 'pvz',    // 'pvz' | 'map' | 'returns'
-        sheet: null,         // null | 'incident'
-        success: null,       // null | 'completed' | 'completed-with-returns' | 'early-finish'
+        // Вариант оформления досрочного завершения (для сравнения с дизайнером):
+        // 'link'     — A: мелкая текстовая ссылка над Навигатором → шит «Что произошло?» (3 причины)
+        // 'iconBtn'  — B: жёлтая иконка-кнопка «⚠» слева от Навигатора → тот же шит «Что произошло?»
+        // 'incident' — C: постоянная красная кнопка «!» → единый упрощённый шит (после ревью)
+        earlyFinishVariant: 'incident',
+        sheet: null,         // null | 'causes' | 'emergency' | 'planned' | 'returns-warn' | 'incident'
+        success: null,       // null | 'completed' | 'completed-with-returns' | 'planned-early' | 'emergency' | 'early-finish'
         allPointsOpen: false,
     };
 
@@ -386,17 +391,12 @@
     }
 
     function renderBottomActions() {
-        const allDelivered = isComplete();
+        const done = getDonePoints();
+        const total = POINTS.length;
+        const allDelivered = done === total;
         const hasReturns = state.hasReturns;
         const atWarehouse = state.atWarehouse;
-
-        // Постоянная красная кнопка «!» — досрочное/аварийное завершение.
-        // Открывает единый bottom sheet «У вас что-то случилось?».
-        const incidentBtn = `
-            <button class="fr-incident-btn" id="incidentBtn" aria-label="У вас что-то случилось?">
-                ${svg('i-warning', 24)}
-            </button>
-        `;
+        const v = state.earlyFinishVariant;
 
         // ─── Кейс A: всё разгружено + возвратов нет → нормальное завершение в один тап ───
         if (allDelivered && !hasReturns) {
@@ -426,11 +426,24 @@
             `;
         }
 
-        // ─── Кейс C: всё разгружено + есть возвраты + НЕ на складе → «!» + Навигатор «Склад» ───
+        // ─── Кейс C: всё разгружено + есть возвраты + НЕ на складе ───
         if (allDelivered && hasReturns && !atWarehouse) {
+            if (v === 'incident') {
+                return `
+                    <div class="fr-bottom-row">
+                        <button class="fr-incident-btn" id="incidentBtn" aria-label="У вас что-то случилось?">${svg('i-warning', 24)}</button>
+                        <button class="fr-navigator" aria-label="Навигатор">
+                            ${svg('i-navigator', 22)}<span>Навигатор «Склад»</span>
+                        </button>
+                    </div>
+                `;
+            }
+            // Варианты A/B: ссылка «Завершить с возвратами ›» + Навигатор «Склад»
             return `
+                <button class="fr-finish-link fr-finish-link--accent" id="finishBtn" data-mode="early-with-returns">
+                    ${svg('i-warning', 14)} Завершить с возвратами ›
+                </button>
                 <div class="fr-bottom-row">
-                    ${incidentBtn}
                     <button class="fr-navigator" aria-label="Навигатор">
                         ${svg('i-navigator', 22)}<span>Навигатор «Склад»</span>
                     </button>
@@ -438,10 +451,39 @@
             `;
         }
 
-        // ─── Кейс D: поездка ещё идёт → постоянная «!» + большой Навигатор ───
+        // ─── Кейс D: поездка ещё идёт → доступ к досрочному завершению зависит от варианта ───
+
+        // C: постоянная красная кнопка «!» слева от Навигатора
+        if (v === 'incident') {
+            return `
+                <div class="fr-bottom-row">
+                    <button class="fr-incident-btn" id="incidentBtn" aria-label="У вас что-то случилось?">${svg('i-warning', 24)}</button>
+                    <button class="fr-navigator" aria-label="Навигатор">
+                        ${svg('i-navigator', 22)}<span>Навигатор</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        // B: жёлтая иконка-кнопка «⚠» слева от Навигатора
+        if (v === 'iconBtn') {
+            return `
+                <div class="fr-bottom-row">
+                    <button class="fr-finish-icon" id="finishBtn" aria-label="Завершить досрочно">${svg('i-warning', 22)}</button>
+                    <button class="fr-navigator" aria-label="Навигатор">
+                        ${svg('i-navigator', 22)}<span>Навигатор</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        // A: текстовая ссылка над большим Навигатором
+        const linkAccent = done >= total - 1 ? 'fr-finish-link--accent' : '';
         return `
+            <button class="fr-finish-link ${linkAccent}" id="finishBtn">
+                ${svg('i-warning', 14)} Завершить досрочно ›
+            </button>
             <div class="fr-bottom-row">
-                ${incidentBtn}
                 <button class="fr-navigator" aria-label="Навигатор">
                     ${svg('i-navigator', 22)}<span>Навигатор</span>
                 </button>
@@ -450,7 +492,206 @@
     }
 
     // ============================================================
-    // Bottom sheet: «У вас что-то случилось?» (единый, после ревью)
+    // Bottom sheet: предупреждение «у вас возвраты, вы не на складе» (A/B)
+    // ============================================================
+    function renderSheetReturnsWarn() {
+        return `
+            <div class="fr-sheet__header">
+                <div class="fr-sheet__title">Везите возвраты на склад</div>
+                <button class="fr-sheet__close" id="sheetClose">${svg('i-close', 20)}</button>
+            </div>
+            <div class="fr-sheet__body">
+                <div class="fr-emergency-callout" style="background: #fff8e6; border-color: rgba(176, 121, 0, 0.18);">
+                    <div class="fr-emergency-callout__icon" style="background: #fff4d6; color: #b07900;">${svg('i-warning', 24)}</div>
+                    <div class="fr-emergency-callout__text">
+                        <b style="color: #6b4d00;">У вас ${RETURNS_COUNT} возвратных ${pluralize(RETURNS_COUNT, 'коробка','коробки','коробок')}.</b><br>
+                        Поездку нельзя завершить — нужно сначала довезти их обратно на склад и сдать.
+                    </div>
+                </div>
+
+                <button class="fr-call-btn" id="goToWarehouse" style="background: var(--mo-accent-purple); box-shadow: 0 6px 18px rgba(167,58,253,0.32);">
+                    ${svg('i-navigator', 24)} Построить маршрут до склада
+                </button>
+
+                <div class="fr-info-line" style="margin-top: 16px;">
+                    ${svg('i-info', 18)}
+                    <span>Когда приедете на склад — отметьте «Я на складе», чтобы появилась кнопка сдачи возвратов.</span>
+                </div>
+
+                <button class="fr-cancel-link" id="sheetClose2">Вернуться к поездке</button>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // Bottom sheet: «Что произошло?» (варианты A/B — 3 причины)
+    // ============================================================
+    function renderSheetCauses() {
+        const complete = isComplete();
+        if (complete) {
+            return `
+                <div class="fr-sheet__header">
+                    <div class="fr-sheet__title">Завершить поездку?</div>
+                    <button class="fr-sheet__close" id="sheetClose">${svg('i-close', 20)}</button>
+                </div>
+                <div class="fr-sheet__body">
+                    <div class="fr-info-line">
+                        ${svg('i-info', 18)}
+                        <span>Все ${TOTAL_BOXES} коробок переданы в ПВЗ. Поездка будет закрыта, рейс уйдёт в архив.</span>
+                    </div>
+                    <button class="fr-call-btn" id="confirmCompleted" style="background: var(--fr-success-fg); box-shadow: 0 6px 18px rgba(26,162,96,0.32); margin-top: 16px;">
+                        ${svg('i-check', 24)} Завершить поездку
+                    </button>
+                </div>
+            `;
+        }
+        return `
+            <div class="fr-sheet__header">
+                <div class="fr-sheet__title">Что произошло?</div>
+                <button class="fr-sheet__close" id="sheetClose">${svg('i-close', 20)}</button>
+            </div>
+            <div class="fr-sheet__body">
+                <button class="fr-cause fr-cause--emergency" data-cause="emergency">
+                    <span class="fr-cause__icon">${svg('i-warning', 24)}</span>
+                    <span class="fr-cause__text">
+                        <span class="fr-cause__title">ЧП — нужна срочная помощь</span>
+                        <span class="fr-cause__sub">Поломка машины, ДТП, проблемы со здоровьем</span>
+                    </span>
+                    <span class="fr-cause__arrow">${svg('i-chevron-right', 20)}</span>
+                </button>
+
+                <button class="fr-cause fr-cause--planned" data-cause="planned">
+                    <span class="fr-cause__icon">${svg('i-clock', 24)}</span>
+                    <span class="fr-cause__text">
+                        <span class="fr-cause__title">Не могу продолжать поездку</span>
+                        <span class="fr-cause__sub">Не успеваю по времени, закончилась смена</span>
+                    </span>
+                    <span class="fr-cause__arrow">${svg('i-chevron-right', 20)}</span>
+                </button>
+
+                <button class="fr-cause fr-cause--cancel" data-cause="cancel">
+                    <span class="fr-cause__icon">${svg('i-back', 22)}</span>
+                    <span class="fr-cause__text">
+                        <span class="fr-cause__title">Я нажал случайно</span>
+                        <span class="fr-cause__sub">Вернуться к поездке</span>
+                    </span>
+                </button>
+            </div>
+        `;
+    }
+
+    function renderSheetEmergency() {
+        return `
+            <div class="fr-sheet__header">
+                <button class="fr-sheet__back" id="sheetBack">${svg('i-back', 22)}</button>
+                <div class="fr-sheet__title" style="text-align:left;flex:1">Срочная остановка</div>
+                <button class="fr-sheet__close" id="sheetClose">${svg('i-close', 20)}</button>
+            </div>
+            <div class="fr-sheet__body">
+                <div class="fr-emergency-callout">
+                    <div class="fr-emergency-callout__icon">${svg('i-warning', 24)}</div>
+                    <div class="fr-emergency-callout__text">
+                        <b>Сообщите логисту о ЧП.</b><br>
+                        Логист получит уведомление в системе и поможет решить вопрос. Параллельно напишите ему в чате (WhatsApp / Telegram).
+                    </div>
+                </div>
+
+                <button class="fr-call-btn" id="notifyLogist">
+                    ${svg('i-warning', 24)} Сообщить о ЧП логисту
+                </button>
+
+                <button class="fr-112-btn" id="call112">
+                    ${svg('i-phone', 20)} Позвонить в 112
+                </button>
+
+                <div class="fr-call-hint">После связи с логистом — завершите поездку</div>
+
+                ${renderSlideToConfirm('Удерживайте, чтобы завершить поездку')}
+
+                <div class="fr-info-line">
+                    ${svg('i-info', 18)}
+                    <span>${getUnloadedBoxes()} коробок остаются в системе. Логист организует возврат на склад или передачу другому водителю.</span>
+                </div>
+
+                <button class="fr-cancel-link" id="sheetClose2">Вернуться к поездке</button>
+            </div>
+        `;
+    }
+
+    function renderSheetPlanned() {
+        const unloaded = getUnloadedPoints();
+        const unloadedBoxes = getUnloadedBoxes();
+        const hasReturns = state.hasReturns;
+        const showMax = 4;
+        const visible = unloaded.slice(0, showMax);
+        const rest = unloaded.length - showMax;
+
+        const totalAtDriver = unloadedBoxes + (hasReturns ? RETURNS_COUNT : 0);
+
+        return `
+            <div class="fr-sheet__header">
+                <button class="fr-sheet__back" id="sheetBack">${svg('i-back', 22)}</button>
+                <div class="fr-sheet__title" style="text-align:left;flex:1">Завершить поездку</div>
+                <button class="fr-sheet__close" id="sheetClose">${svg('i-close', 20)}</button>
+            </div>
+            <div class="fr-sheet__body">
+                <div class="fr-undone-summary">
+                    <div class="fr-undone-summary__title">Останется за вами</div>
+                    <div class="fr-undone-summary__count">${totalAtDriver} ${pluralize(totalAtDriver, 'коробка', 'коробки', 'коробок')}</div>
+                </div>
+
+                <div class="fr-undone-list">
+                    ${unloadedBoxes > 0 ? `
+                        <div class="fr-undone-item" style="background: #fff8f8;">
+                            <div class="fr-undone-item__num" style="background: var(--fr-destructive-bg); color: var(--fr-destructive-fg);">${unloaded.length}</div>
+                            <div class="fr-undone-item__main">
+                                <div class="fr-undone-item__addr">Не разгружено в ПВЗ</div>
+                                <div class="fr-undone-item__boxes">${unloadedBoxes} ${pluralize(unloadedBoxes, 'коробка', 'коробки', 'коробок')} на ${unloaded.length} ${pluralize(unloaded.length, 'точке','точках','точках')}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${hasReturns ? `
+                        <div class="fr-undone-item" style="background: #fff8e6;">
+                            <div class="fr-undone-item__num" style="background: #fff4d6; color: #b07900;">${RETURNS_COUNT}</div>
+                            <div class="fr-undone-item__main">
+                                <div class="fr-undone-item__addr">Возвратные коробки</div>
+                                <div class="fr-undone-item__boxes" style="color: #b07900;">${RETURNS_COUNT} ${pluralize(RETURNS_COUNT, 'коробка', 'коробки', 'коробок')} забранных с ПВЗ</div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${unloadedBoxes > 0 && visible.length > 0 ? visible.map(p => `
+                        <div class="fr-undone-item">
+                            <div class="fr-undone-item__num">${p.n}</div>
+                            <div class="fr-undone-item__main">
+                                <div class="fr-undone-item__addr">${p.address}</div>
+                                <div class="fr-undone-item__boxes">${p.boxes} ${pluralize(p.boxes, 'коробка', 'коробки', 'коробок')}</div>
+                            </div>
+                        </div>
+                    `).join('') : ''}
+                    ${rest > 0 ? `
+                        <div class="fr-undone-item" style="opacity:.7">
+                            <div class="fr-undone-item__num">…</div>
+                            <div class="fr-undone-item__main">
+                                <div class="fr-undone-item__addr">и ещё ${rest} ${pluralize(rest, 'точка','точки','точек')}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="fr-info-line fr-info-line--warning">
+                    ${svg('i-warning', 18)}
+                    <span><b>Эти коробки остаются за вами.</b> После завершения поездки довезите их обратно на склад до конца смены.</span>
+                </div>
+
+                ${renderSlideToConfirm('Удерживайте, чтобы завершить')}
+
+                <button class="fr-cancel-link" id="sheetClose2">Вернуться к поездке</button>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // Bottom sheet: «У вас что-то случилось?» (вариант C, после ревью)
     // Инфо о коробках + «Написать в поддержку» + slide-to-confirm.
     // ============================================================
     function renderSheetIncident() {
@@ -480,21 +721,22 @@
                     ${svg('i-chat', 22)} Написать в поддержку
                 </button>
 
-                ${renderSlideToConfirm('Завершить поездку')}
+                ${renderSlideToConfirm('Завершить поездку', { hint: 'Проведите слева направо', destructive: true })}
 
                 <button class="fr-cancel-link" id="sheetClose2">Отмена</button>
             </div>
         `;
     }
 
-    function renderSlideToConfirm(label, hint = 'Проведите слева направо') {
+    function renderSlideToConfirm(label, opts = {}) {
+        const { hint = '', destructive = false } = opts;
+        const text = hint
+            ? `<span class="fr-slide__label">${label}</span><span class="fr-slide__hint">${hint}</span>`
+            : label;
         return `
-            <div class="fr-slide fr-slide--destructive" id="slide" data-label="${label}">
+            <div class="fr-slide ${destructive ? 'fr-slide--destructive' : ''}" id="slide" data-label="${label}">
                 <div class="fr-slide__fill" id="slideFill"></div>
-                <div class="fr-slide__track-text" id="slideText">
-                    <span class="fr-slide__label">${label}</span>
-                    <span class="fr-slide__hint">${hint}</span>
-                </div>
+                <div class="fr-slide__track-text" id="slideText">${text}</div>
                 <div class="fr-slide__handle" id="slideHandle">${svg('i-arrow-right', 24)}</div>
             </div>
         `;
@@ -513,7 +755,10 @@
     // ============================================================
     function renderSuccess(kind) {
         // Сборка корректных текстов с учётом возвратов
-        const atDriver = getUnloadedBoxes() + (state.hasReturns ? RETURNS_COUNT : 0);
+        const unloaded = getUnloadedBoxes();
+        const hasReturns = state.hasReturns;
+        const returnsCount = hasReturns ? RETURNS_COUNT : 0;
+        const atDriver = unloaded + returnsCount;
 
         const map = {
             'completed': {
@@ -528,11 +773,28 @@
                 title: 'Поездка завершена',
                 sub: `Все ${TOTAL_BOXES} коробок переданы в ПВЗ. ${RETURNS_COUNT} ${pluralize(RETURNS_COUNT,'возвратная коробка сдана','возвратные коробки сданы','возвратных коробок сданы')} на склад. Спасибо за смену!`,
             },
+            // Вариант C (после ревью): единый текст досрочного завершения
             'early-finish': {
                 icon: svg('i-warning', 48),
                 iconClass: 'is-warning',
                 title: 'Поездка завершена досрочно',
                 sub: `Уведомление отправлено экспедитору. ${atDriver} ${pluralize(atDriver,'коробка числится','коробки числятся','коробок числятся')} за вами — экспедитор организует их возврат на склад через другого водителя.`,
+            },
+            // Варианты A/B: плановое досрочное завершение
+            'planned-early': {
+                icon: svg('i-warning', 48),
+                iconClass: 'is-warning',
+                title: 'Поездка завершена досрочно',
+                sub: hasReturns
+                    ? `${atDriver} ${pluralize(atDriver,'коробка остаётся','коробки остаются','коробок остаются')} за вами (${unloaded} невыгруженных + ${RETURNS_COUNT} возвратных). Довезите их на склад до конца смены — логист увидит причину в отчёте.`
+                    : `${unloaded} ${pluralize(unloaded,'коробка остаётся','коробки остаются','коробок остаются')} за вами — довезите их обратно на склад до конца смены. Логист увидит причину в отчёте.`,
+            },
+            // Варианты A/B: ЧП
+            'emergency': {
+                icon: svg('i-warning', 48),
+                iconClass: 'is-emergency',
+                title: 'Поездка закрыта',
+                sub: 'Логист получил уведомление о ЧП. Дождитесь его ответа в чате.',
             },
         };
         const data = map[kind];
@@ -556,7 +818,11 @@
     function openSheet(kind) {
         state.sheet = kind;
         const sheetContent = document.getElementById('sheetContent');
-        if (kind === 'incident') sheetContent.innerHTML = renderSheetIncident();
+        if (kind === 'causes')        sheetContent.innerHTML = renderSheetCauses();
+        if (kind === 'emergency')     sheetContent.innerHTML = renderSheetEmergency();
+        if (kind === 'planned')       sheetContent.innerHTML = renderSheetPlanned();
+        if (kind === 'returns-warn')  sheetContent.innerHTML = renderSheetReturnsWarn();
+        if (kind === 'incident')      sheetContent.innerHTML = renderSheetIncident();
 
         document.getElementById('backdrop').classList.add('is-open');
         document.getElementById('sheet').classList.add('is-open');
@@ -649,20 +915,36 @@
     // Event wiring
     // ============================================================
     function wireEvents() {
-        // Primary «Завершить поездку» / «Сдать возвраты и завершить»
-        // (кейсы A и B — поездка реально готова к закрытию) → один тап → success
+        // Кнопка «Завершить» внизу (primary-завершение для A/B/C, либо
+        // ссылка/иконка досрочного завершения для вариантов A/B)
         const finishBtn = document.getElementById('finishBtn');
         if (finishBtn) {
             finishBtn.addEventListener('click', () => {
-                if (state.hasReturns && state.atWarehouse) {
-                    renderSuccess('completed-with-returns');
-                } else {
+                const allDelivered = isComplete();
+                const hasReturns = state.hasReturns;
+                const atWarehouse = state.atWarehouse;
+
+                // Кейс A: всё ок, без возвратов → один тап → success
+                if (allDelivered && !hasReturns) {
                     renderSuccess('completed');
+                    return;
                 }
+                // Кейс B: всё ок, есть возвраты, на складе → success с возвратами
+                if (allDelivered && hasReturns && atWarehouse) {
+                    renderSuccess('completed-with-returns');
+                    return;
+                }
+                // Кейс C: всё ок, есть возвраты, НЕ на складе → защитный sheet
+                if (allDelivered && hasReturns && !atWarehouse) {
+                    openSheet('returns-warn');
+                    return;
+                }
+                // Кейс D (варианты A/B): поездка идёт → шит «Что произошло?»
+                openSheet('causes');
             });
         }
 
-        // Постоянная кнопка «!» (кейсы C и D) → единый инцидент-шит
+        // Постоянная кнопка «!» (вариант C) → единый инцидент-шит
         const incidentBtn = document.getElementById('incidentBtn');
         if (incidentBtn) {
             incidentBtn.addEventListener('click', () => openSheet('incident'));
@@ -718,11 +1000,70 @@
     }
 
     function wireSheetEvents() {
-        // Закрытие (×, «Отмена», бэкдроп)
+        // Закрытие (×, «Отмена», «Вернуться», бэкдроп)
         ['sheetClose', 'sheetClose2'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('click', closeSheet);
         });
+
+        // Назад со 2-го шага (A/B)
+        const back = document.getElementById('sheetBack');
+        if (back) back.addEventListener('click', () => openSheet('causes'));
+
+        // Выбор причины (A/B)
+        document.querySelectorAll('[data-cause]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cause = btn.getAttribute('data-cause');
+                if (cause === 'cancel') {
+                    closeSheet();
+                } else if (cause === 'emergency') {
+                    openSheet('emergency');
+                } else if (cause === 'planned') {
+                    openSheet('planned');
+                }
+            });
+        });
+
+        // Кнопка уведомления логиста (ЧП-ветка A/B)
+        const notifyBtn = document.getElementById('notifyLogist');
+        if (notifyBtn) {
+            notifyBtn.addEventListener('click', () => {
+                notifyBtn.innerHTML = `${svg('i-check', 24)} Уведомление отправлено`;
+                notifyBtn.style.background = 'var(--fr-success-fg)';
+                notifyBtn.style.boxShadow = '0 6px 18px rgba(26,162,96,0.32)';
+                notifyBtn.disabled = true;
+            });
+        }
+
+        // Кнопка «Позвонить в 112» (A/B)
+        const call112Btn = document.getElementById('call112');
+        if (call112Btn) {
+            call112Btn.addEventListener('click', () => {
+                call112Btn.innerHTML = `${svg('i-check', 20)} Звонок инициирован`;
+                call112Btn.style.background = 'var(--fr-emergency-bg)';
+                call112Btn.disabled = true;
+            });
+        }
+
+        // Кнопка «Построить маршрут до склада» (returns-warn, A/B)
+        const goToWarehouseBtn = document.getElementById('goToWarehouse');
+        if (goToWarehouseBtn) {
+            goToWarehouseBtn.addEventListener('click', () => {
+                goToWarehouseBtn.innerHTML = `${svg('i-check', 24)} Маршрут построен`;
+                goToWarehouseBtn.style.background = 'var(--fr-success-fg)';
+                goToWarehouseBtn.style.boxShadow = '0 6px 18px rgba(26,162,96,0.32)';
+                goToWarehouseBtn.disabled = true;
+            });
+        }
+
+        // Confirm completed (на случай вызова шита в финальном стейте, A/B)
+        const confirmCompletedBtn = document.getElementById('confirmCompleted');
+        if (confirmCompletedBtn) {
+            confirmCompletedBtn.addEventListener('click', () => {
+                closeSheet();
+                renderSuccess('completed');
+            });
+        }
 
         // «Написать в поддержку» — в реальном приложении открывает чат поддержки
         // (deeplink в существующую систему саппорта). В прототипе — пометка нажатия.
@@ -735,12 +1076,15 @@
             });
         }
 
-        // Slide-to-confirm → досрочное завершение
+        // Slide-to-confirm — целевой success зависит от шита
+        if (state.sheet === 'emergency') {
+            wireSlide(() => { closeSheet(); renderSuccess('emergency'); });
+        }
+        if (state.sheet === 'planned') {
+            wireSlide(() => { closeSheet(); renderSuccess('planned-early'); });
+        }
         if (state.sheet === 'incident') {
-            wireSlide(() => {
-                closeSheet();
-                renderSuccess('early-finish');
-            });
+            wireSlide(() => { closeSheet(); renderSuccess('early-finish'); });
         }
     }
 
@@ -749,6 +1093,11 @@
     // ============================================================
     function renderStateSwitcher() {
         const container = document.getElementById('stateButtons');
+        const VARIANTS = [
+            { id: 'link',     label: 'A · ссылка'   },
+            { id: 'iconBtn',  label: 'B · иконка ⚠' },
+            { id: 'incident', label: 'C · «!» + ревью' },
+        ];
         container.innerHTML = `
             ${SCENARIOS.map((s, i) => `
                 <button class="state-switcher__btn ${i === state.scenarioIdx ? 'is-active' : ''}" data-action="scenario" data-idx="${i}">${s.label}</button>
@@ -760,6 +1109,11 @@
             <button class="state-switcher__btn ${state.atWarehouse ? 'is-active' : ''}" data-action="toggle-warehouse" ${!state.hasReturns ? 'disabled' : ''}>
                 На складе: ${state.atWarehouse ? 'да' : 'нет'}
             </button>
+            <span class="state-switcher__divider"></span>
+            <span class="state-switcher__group-label">Завершить досрочно:</span>
+            ${VARIANTS.map(vr => `
+                <button class="state-switcher__btn ${state.earlyFinishVariant === vr.id ? 'is-active' : ''}" data-action="set-variant" data-variant="${vr.id}">${vr.label}</button>
+            `).join('')}
         `;
         container.querySelectorAll('.state-switcher__btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -771,6 +1125,8 @@
                     if (!state.hasReturns) state.atWarehouse = false;
                 } else if (action === 'toggle-warehouse') {
                     state.atWarehouse = !state.atWarehouse;
+                } else if (action === 'set-variant') {
+                    state.earlyFinishVariant = btn.getAttribute('data-variant');
                 }
                 state.allPointsOpen = false;
                 state.sheet = null;

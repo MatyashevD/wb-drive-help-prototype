@@ -469,6 +469,31 @@
     height: 24px;
 }
 
+/* Вариант B — иконка-кнопка «⚠» (мягкий красный фон, без обводки) */
+.fr-finish-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(229, 57, 53, 0.10);
+    color: var(--fr-destructive-fg);
+    border: none;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.fr-finish-icon:hover {
+    background: rgba(229, 57, 53, 0.16);
+}
+.fr-finish-icon:active {
+    transform: scale(0.96);
+}
+.fr-finish-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
 /* «Все точки разгрузки» — раскрывашка */
 .fr-all-points {
     margin: 8px 12px 140px;
