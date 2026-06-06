@@ -440,32 +440,33 @@
 }
 
 /* ============================================================
-   Вариант B досрочного завершения — красная иконка-кнопка «⚠»
-   слева от Навигатора. Цвет destructive — чтобы было понятно,
-   что это опасное действие, требующее подтверждения.
+   Постоянная кнопка «!» слева от Навигатора — досрочное /
+   аварийное завершение. Белая с тонкой обводкой и красной
+   иконкой: заметна как «опасное действие», но не кричит
+   красным фоном во время нормального рейса.
    ============================================================ */
-.fr-finish-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    background: rgba(229, 57, 53, 0.10);
+.fr-incident-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: #ffffff;
     color: var(--fr-destructive-fg);
-    border: none;
+    border: 1.5px solid var(--fr-destructive-fg);
     display: grid;
     place-items: center;
     cursor: pointer;
     flex-shrink: 0;
     transition: background 0.15s ease, transform 0.1s ease;
 }
-.fr-finish-icon:hover {
-    background: rgba(229, 57, 53, 0.16);
+.fr-incident-btn:hover {
+    background: var(--fr-destructive-bg);
 }
-.fr-finish-icon:active {
+.fr-incident-btn:active {
     transform: scale(0.96);
 }
-.fr-finish-icon svg {
-    width: 22px;
-    height: 22px;
+.fr-incident-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
 /* «Все точки разгрузки» — раскрывашка */
@@ -1066,6 +1067,114 @@
 }
 
 /* ============================================================
+   Инцидент-шит «У вас что-то случилось?» (после дизайн-ревью)
+   ============================================================ */
+.fr-sheet__close-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 4px 16px 0;
+}
+.fr-incident {
+    text-align: center;
+    padding-bottom: 4px;
+}
+.fr-incident__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #fff4e0;
+    color: #f08c00;
+    display: grid;
+    place-items: center;
+    margin: 4px auto 16px;
+}
+.fr-incident__icon svg {
+    width: 32px;
+    height: 32px;
+}
+.fr-incident__title {
+    font-size: 20px;
+    line-height: 25px;
+    font-weight: 700;
+    color: var(--mo-text-icon-primary);
+    margin-bottom: 8px;
+}
+.fr-incident__sub {
+    font-size: 14px;
+    line-height: 19px;
+    color: var(--mo-text-icon-secondary);
+    margin-bottom: 20px;
+    padding: 0 4px;
+}
+.fr-incident__callout {
+    display: flex;
+    gap: 12px;
+    text-align: left;
+    background: #fff8e6;
+    border: 1px solid rgba(176, 121, 0, 0.16);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+.fr-incident__callout-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff4d6;
+    color: #f08c00;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.fr-incident__callout-icon svg {
+    width: 18px;
+    height: 18px;
+}
+.fr-incident__callout-text {
+    font-size: 14px;
+    line-height: 19px;
+    color: #6b4d00;
+}
+.fr-incident__callout-text b {
+    color: #5a4000;
+    font-weight: 700;
+}
+
+/* «Написать в поддержку» — вторичная helpful-кнопка над свайпом */
+.fr-support-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--mo-accent-purple-soft);
+    color: var(--mo-accent-purple);
+    border: none;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.fr-support-btn:hover {
+    background: rgba(167, 58, 253, 0.16);
+}
+.fr-support-btn:active {
+    transform: scale(0.99);
+}
+.fr-support-btn.is-done {
+    background: var(--fr-success-bg);
+    color: var(--fr-success-fg);
+}
+.fr-support-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ============================================================
    Slide-to-confirm — реальный drag-жест
    ============================================================ */
 .fr-slide {
@@ -1083,14 +1192,34 @@
     position: absolute;
     inset: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1px;
     font-size: 15px;
     line-height: 20px;
     font-weight: 600;
     color: var(--mo-text-icon-secondary);
     pointer-events: none;
     transition: opacity 0.2s;
+}
+.fr-slide__label {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 700;
+}
+.fr-slide__hint {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 500;
+    opacity: 0.75;
+}
+/* Деструктивный вариант — красная дорожка и красный текст (как в макете) */
+.fr-slide--destructive {
+    background: var(--fr-destructive-bg);
+}
+.fr-slide--destructive .fr-slide__track-text {
+    color: var(--fr-destructive-fg);
 }
 .fr-slide__fill {
     position: absolute;
